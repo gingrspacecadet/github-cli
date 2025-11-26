@@ -25,8 +25,6 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *userp) {
     return realsize;
 }
 
-
-
 int main(void) {
     CURL *curl = NULL;
     CURLcode res;
@@ -39,7 +37,13 @@ int main(void) {
         return 1;
     }
 
-    curl_easy_setopt(curl, CURLOPT_URL, "https://api.github.com/users/gingrspacecadet/repos");
+    char username[64];
+    printf("Enter your username:  ");
+    scanf("%s", username);
+    char url[128];
+    sprintf(url, "https://api.github.com/users/%s/repos", username);
+
+    curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &resp);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "github-cli");
@@ -70,6 +74,10 @@ int main(void) {
 
     /* Iterate over array elements */
     int repo_count = cJSON_GetArraySize(root);
+    if (repo_count == 0) {
+        printf("No repositories.\n");
+        goto cleanup;
+    }
     for (int i = 0; i < repo_count; i++) {
         cJSON *repo = cJSON_GetArrayItem(root, i);
 
